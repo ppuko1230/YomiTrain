@@ -29,4 +29,12 @@ public class TitleUIManager : MonoBehaviour
         roomSelectionPanel.SetActive(false);
         settingsPanel.SetActive(false);
     }
+
+    // 音量調整用バー
+    public void OnVolumeChanged(float volume)
+    {
+        // 後で実装
+        Debug.Log("音量：" + volume);
+    }
+
 }
