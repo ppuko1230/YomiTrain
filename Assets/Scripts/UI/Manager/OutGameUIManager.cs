@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -68,6 +69,7 @@ public class OutGameUIManager : MonoBehaviour
     /// </summary>
     public void ShowRoomSelectionPanel()
     {
+        Debug.Log($"RoomSelectionPanleを表示します。");
         roomSelectionPanel.SetActive(true);
         createRoomPanel.SetActive(false);
         joinRoomPanel.SetActive(false);

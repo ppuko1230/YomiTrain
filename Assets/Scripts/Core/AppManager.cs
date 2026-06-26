@@ -4,13 +4,13 @@ using UnityEngine;
 
 public enum GameState
 {
-    Title,              // �^�C�g�����
-    RoomSelect,         // ���[���I��
-    RoomLobby,          // �����o�[�ҋ@
-    RoleSelection,      // �e���߁i3�b�̎������o�j
-    GenreSelection,     // �W����������
-    InGame,             // �Q�[����
-    Result              // �Q�[���I���i�E���E���ʔ��\�j
+    Title,
+    RoomSelect,
+    RoomLobby,
+    RoleSelection,
+    GenreSelection,
+    InGame,
+    Result
 }
 
 public class AppManager : MonoBehaviour
@@ -33,7 +33,7 @@ public class AppManager : MonoBehaviour
     public void ChangeState(GameState nextState)
     {
         CurrentState = nextState;
-        Debug.Log($"�yState�ύX�z���݂̏�Ԃ� [{nextState}] �ɂȂ�܂����B");
+        Debug.Log($"ルームStateが [{nextState}] に変わりました");
 
         OnStateChanged?.Invoke(nextState);
     }
