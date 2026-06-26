@@ -52,7 +52,7 @@ public class OutGameUIManager : MonoBehaviour
     {
         bool isRoomSelectState = (newState == GameState.RoomSelect);
 
-        outGameRoot.SetActive(isRoomSelectState);
+        roomSelectionPanel.SetActive(isRoomSelectState);
 
         if (isRoomSelectState)
         {
