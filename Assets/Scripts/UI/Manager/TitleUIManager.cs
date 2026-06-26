@@ -29,7 +29,7 @@ public class TitleUIManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 【重要】このオブジェクトが破棄される時は、必ずイベント登録を解除する
+        // 【重要】このオブジェクトが破棄される時は、s
         // （これを忘れると、存在しないオブジェクトに通知が送られてエラーになります）
         if (AppManager.Instance != null)
         {

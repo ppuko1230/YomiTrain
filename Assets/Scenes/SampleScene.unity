@@ -632,8 +632,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 61.539505, y: 103.422935}
-  m_SizeDelta: {x: 232.1584, y: 103.6187}
+  m_AnchoredPosition: {x: 190, y: 92}
+  m_SizeDelta: {x: 290.2403, y: 181.0613}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &790941328
 MonoBehaviour:
@@ -1434,8 +1434,8 @@ MonoBehaviour:
   titleRoot: {fileID: 1919209343}
   titlePanel: {fileID: 934002773}
   settingsPanel: {fileID: 1411070755}
-  startButton: {fileID: 0}
-  settingsButton: {fileID: 0}
+  startButton: {fileID: 1392648585}
+  settingsButton: {fileID: 877453156}
   returnButton: {fileID: 0}
 --- !u!4 &1595053568
 Transform:
