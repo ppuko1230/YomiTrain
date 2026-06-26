@@ -4,13 +4,13 @@ using UnityEngine;
 
 public enum GameState
 {
-    Title,              // ƒ^ƒCƒgƒ‹‰æ–Ê
-    RoomSelect,         // ƒ‹[ƒ€‘I‘ğ
-    RoomLobby,          // ƒƒ“ƒo[‘Ò‹@
-    RoleSelection,      // eŒˆ‚ßi3•b‚Ì©“®‰‰oj
-    GenreSelection,     // ƒWƒƒƒ“ƒ‹Œˆ‚ß
-    InGame,             // ƒQ[ƒ€’†
-    Result              // ƒQ[ƒ€I—¹i’E—EŒ‹‰Ê”­•\j
+    Title,              // ï¿½^ï¿½Cï¿½gï¿½ï¿½ï¿½ï¿½ï¿½
+    RoomSelect,         // ï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½Iï¿½ï¿½
+    RoomLobby,          // ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½[ï¿½Ò‹@
+    RoleSelection,      // ï¿½eï¿½ï¿½ï¿½ßi3ï¿½bï¿½Ìï¿½ï¿½ï¿½ï¿½ï¿½ï¿½oï¿½j
+    GenreSelection,     // ï¿½Wï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    InGame,             // ï¿½Qï¿½[ï¿½ï¿½ï¿½ï¿½
+    Result              // ï¿½Qï¿½[ï¿½ï¿½ï¿½Iï¿½ï¿½ï¿½iï¿½Eï¿½ï¿½ï¿½Eï¿½ï¿½ï¿½Ê”ï¿½ï¿½\ï¿½j
 }
 
 public class AppManager : MonoBehaviour
@@ -33,7 +33,7 @@ public class AppManager : MonoBehaviour
     public void ChangeState(GameState nextState)
     {
         CurrentState = nextState;
-        Debug.Log($"yState•ÏXzŒ»İ‚Ìó‘Ô‚ª [{nextState}] ‚É‚È‚è‚Ü‚µ‚½B");
+        Debug.Log($"ï¿½yStateï¿½ÏXï¿½zï¿½ï¿½ï¿½İ‚Ìï¿½Ô‚ï¿½ [{nextState}] ï¿½É‚È‚ï¿½Ü‚ï¿½ï¿½ï¿½ï¿½B");
 
         OnStateChanged?.Invoke(nextState);
     }

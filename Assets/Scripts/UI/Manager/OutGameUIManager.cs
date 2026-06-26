@@ -1,108 +1,95 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// RoomSelectƒXƒe[ƒgB
-/// ƒ‹[ƒ€ì¬Aƒ‹[ƒ€Q‰ÁAQ‰Á¸”s‚Ìƒ[ƒJƒ‹ƒGƒ‰[•\¦‚ğ’S“–‚·‚éB
-/// </summary>
 public class OutGameUIManager : MonoBehaviour
 {
-    public static OutGameUIManager Instance { get; private set; }
+    [Header("UIãƒ‘ãƒãƒ«ã®å‚ç…§")]
+    [SerializeField] private GameObject outGameRoot;        // RoomSelectç”»é¢å…¨ä½“ã‚’ã¾ã¨ã‚ã‚‹è¦ª
+    [SerializeField] private GameObject roomSelectionPanel; // ãƒ«ãƒ¼ãƒ é¸æŠç”»é¢
+    [SerializeField] private GameObject createRoomPanel;    // ãƒ«ãƒ¼ãƒ ä½œæˆç”»é¢
+    [SerializeField] private GameObject joinRoomPanel;      // ãƒ«ãƒ¼ãƒ å‚åŠ ç”»é¢
 
-    [Header("Root")]
-    [SerializeField] private GameObject rootPanel;
+    [Header("ãƒœã‚¿ãƒ³ã®å‚ç…§")]
+    [SerializeField] private Button roomCreateButton;       // ä½œæˆç”»é¢ã¸è¡Œããƒœã‚¿ãƒ³
+    [SerializeField] private Button roomJoinButton;         // å‚åŠ ç”»é¢ã¸è¡Œããƒœã‚¿ãƒ³
+    [SerializeField] private Button createBackButton;       // ä½œæˆç”»é¢ã‹ã‚‰æˆ»ã‚‹ãƒœã‚¿ãƒ³
+    [SerializeField] private Button joinBackButton;         // å‚åŠ ç”»é¢ã‹ã‚‰æˆ»ã‚‹ãƒœã‚¿ãƒ³
 
-    [Header("Panels")]
-    [SerializeField] private GameObject roomSelectPanel;
-    [SerializeField] private GameObject createRoomPanel;
-    [SerializeField] private GameObject joinRoomPanel;
-    [SerializeField] private GameObject errorDialogPanel;
-
-    [Header("Input")]
-    [SerializeField] private TMP_InputField roomIDInputField;
-
-    [Header("Text")]
-    [SerializeField] private Text statusText;
-    [SerializeField] private Text errorText;
-
-    private void Awake()
+    private void Start()
     {
-        if (Instance == null) Instance = this;
-        else if (Instance != this) Destroy(gameObject);
+        // AppManagerã®çŠ¶æ…‹å¤‰åŒ–ã‚¤ãƒ™ãƒ³ãƒˆã«ç™»éŒ²
+        AppManager.Instance.OnStateChanged += HandleStateChanged;
+
+        // ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã¨ãã®å‡¦ç†ã‚’ç™»éŒ²
+        roomCreateButton.onClick.AddListener(ShowCreateRoomPanel);
+        roomJoinButton.onClick.AddListener(ShowJoinRoomPanel);
+
+        // æˆ»ã‚‹ãƒœã‚¿ãƒ³ãŒã‚ã‚‹å ´åˆ
+        if (createBackButton != null)
+        {
+            createBackButton.onClick.AddListener(ShowRoomSelectionPanel);
+        }
+
+        if (joinBackButton != null)
+        {
+            joinBackButton.onClick.AddListener(ShowRoomSelectionPanel);
+        }
     }
 
-    public void SetVisible(bool visible)
+    private void OnDestroy()
     {
-        if (rootPanel != null) rootPanel.SetActive(visible);
-        if (visible) RefreshUI();
+        if (AppManager.Instance != null)
+        {
+            AppManager.Instance.OnStateChanged -= HandleStateChanged;
+        }
     }
 
-    public void RefreshUI()
+    // ==========================================
+    // AppManagerã‹ã‚‰çŠ¶æ…‹å¤‰åŒ–ã®é€šçŸ¥ã‚’å—ã‘å–ã£ãŸæ™‚ã®å‡¦ç†
+    // ==========================================
+    private void HandleStateChanged(GameState newState)
     {
-        ShowRoomSelect();
-        HideError();
-        ShowStatus("ƒ‹[ƒ€‚ğì¬‚·‚é‚©AID‚ğ“ü—Í‚µ‚ÄQ‰Á‚µ‚Ä‚­‚¾‚³‚¢B");
+        bool isRoomSelectState = (newState == GameState.RoomSelect);
+
+        outGameRoot.SetActive(isRoomSelectState);
+
+        if (isRoomSelectState)
+        {
+            ShowRoomSelectionPanel();
+        }
     }
 
-    public void ShowRoomSelect()
+    // ==========================================
+    // ãƒ‘ãƒãƒ«åˆ‡ã‚Šæ›¿ãˆå‡¦ç†
+    // ==========================================
+
+    /// <summary>
+    /// ãƒ«ãƒ¼ãƒ é¸æŠç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
+    /// </summary>
+    public void ShowRoomSelectionPanel()
     {
-        SetPanel(roomSelectPanel, true);
-        SetPanel(createRoomPanel, false);
-        SetPanel(joinRoomPanel, false);
+        roomSelectionPanel.SetActive(true);
+        createRoomPanel.SetActive(false);
+        joinRoomPanel.SetActive(false);
     }
 
-    public void ShowCreateRoom()
+    /// <summary>
+    /// RoomCreateButtonã‚’æŠ¼ã—ãŸã¨ãã€CreateRoomPanelã¸ç§»è¡Œã™ã‚‹
+    /// </summary>
+    public void ShowCreateRoomPanel()
     {
-        SetPanel(roomSelectPanel, false);
-        SetPanel(createRoomPanel, true);
-        SetPanel(joinRoomPanel, false);
-        ShowStatus("ƒ‹[ƒ€ì¬ƒ{ƒ^ƒ“‚ğ‰Ÿ‚·‚ÆAƒZƒbƒVƒ‡ƒ“ID‚ğ”­s‚µ‚ÄHost‚Æ‚µ‚Ä“üº‚µ‚Ü‚·B");
+        roomSelectionPanel.SetActive(false);
+        createRoomPanel.SetActive(true);
+        joinRoomPanel.SetActive(false);
     }
 
-    public void ShowJoinRoom()
+    /// <summary>
+    /// RoomJoinButtonã‚’æŠ¼ã—ãŸã¨ãã€JoinRoomPanelã¸ç§»è¡Œã™ã‚‹
+    /// </summary>
+    public void ShowJoinRoomPanel()
     {
-        SetPanel(roomSelectPanel, false);
-        SetPanel(createRoomPanel, false);
-        SetPanel(joinRoomPanel, true);
-        ShowStatus("ƒ‹[ƒ€ID‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢B");
+        roomSelectionPanel.SetActive(false);
+        createRoomPanel.SetActive(false);
+        joinRoomPanel.SetActive(true);
     }
-
-    public void ShowStatus(string message)
-    {
-        if (statusText != null) statusText.text = message;
-        Debug.Log($"[OutGameUIManager] {message}");
-    }
-
-    public void ShowError(string message)
-    {
-        if (errorDialogPanel != null) errorDialogPanel.SetActive(true);
-        if (errorText != null) errorText.text = message;
-        ShowStatus(message);
-    }
-
-    public void HideError()
-    {
-        if (errorDialogPanel != null) errorDialogPanel.SetActive(false);
-    }
-
-    public void OnClickedShowCreateRoomButton() => ShowCreateRoom();
-    public void OnClickedShowJoinRoomButton() => ShowJoinRoom();
-    public void OnClickedBackToRoomSelectButton() => ShowRoomSelect();
-    public void OnClickedCloseErrorDialogButton() => HideError();
-
-    public void OnClickedBackToTitleButton()
-    {
-        AppManager.Instance.ChangeState(GameState.Title);
-    }
-
-    private void SetPanel(GameObject panel, bool active)
-    {
-        if (panel != null) panel.SetActive(active);
-    }
-
-    // ‹ŒOnClick–¼‚Æ‚ÌŒİŠ·
-    public void ShowCreateRoomPanel() => OnClickedShowCreateRoomButton();
-    public void ShowJoinRoomPanel() => OnClickedShowJoinRoomButton();
-    public void ReturnToRoomSelection() => OnClickedBackToRoomSelectButton();
 }
