@@ -1,20 +1,19 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class OutGameUIManager : MonoBehaviour
 {
     [Header("UIパネルの参照")]
-    [SerializeField] private GameObject outGameRoot;        // RoomSelect画面全体をまとめる親
+    [Tooltip("RoomSelect画面全体をまとめる親オブジェクト（あれば一括で消せて便利です）")]
+    [SerializeField] private GameObject outGameRoot;
     [SerializeField] private GameObject roomSelectionPanel; // ルーム選択画面
-    [SerializeField] private GameObject createRoomPanel;    // ルーム作成画面
     [SerializeField] private GameObject joinRoomPanel;      // ルーム参加画面
+    // ※ createRoomPanel は削除されました
 
     [Header("ボタンの参照")]
-    [SerializeField] private Button roomCreateButton;       // 作成画面へ行くボタン
     [SerializeField] private Button roomJoinButton;         // 参加画面へ行くボタン
-    [SerializeField] private Button createBackButton;       // 作成画面から戻るボタン
     [SerializeField] private Button joinBackButton;         // 参加画面から戻るボタン
+    // ※ roomCreateButton と createBackButton は削除されました
 
     private void Start()
     {
@@ -22,13 +21,10 @@ public class OutGameUIManager : MonoBehaviour
         AppManager.Instance.OnStateChanged += HandleStateChanged;
 
         // ボタンが押されたときの処理を登録
-        roomCreateButton.onClick.AddListener(ShowCreateRoomPanel);
-        roomJoinButton.onClick.AddListener(ShowJoinRoomPanel);
-
-        // 戻るボタンがある場合
-        if (createBackButton != null)
+        // （「部屋を作る」ボタンの処理はRoomSelectionPanelManagerが担当するのでここには不要です）
+        if (roomJoinButton != null)
         {
-            createBackButton.onClick.AddListener(ShowRoomSelectionPanel);
+            roomJoinButton.onClick.AddListener(ShowJoinRoomPanel);
         }
 
         if (joinBackButton != null)
@@ -52,8 +48,22 @@ public class OutGameUIManager : MonoBehaviour
     {
         bool isRoomSelectState = (newState == GameState.RoomSelect);
 
-        roomSelectionPanel.SetActive(isRoomSelectState);
+        // 状態がRoomSelectなら表示し、Lobbyなど他の状態なら非表示（消す）にする
+        if (outGameRoot != null)
+        {
+            outGameRoot.SetActive(isRoomSelectState);
+        }
+        else
+        {
+            // 親オブジェクトが設定されていない場合は個別に非表示にする
+            if (!isRoomSelectState)
+            {
+                roomSelectionPanel.SetActive(false);
+                joinRoomPanel.SetActive(false);
+            }
+        }
 
+        // RoomSelect状態に入った時は、確実に基本の選択画面を出す
         if (isRoomSelectState)
         {
             ShowRoomSelectionPanel();
@@ -69,19 +79,8 @@ public class OutGameUIManager : MonoBehaviour
     /// </summary>
     public void ShowRoomSelectionPanel()
     {
-        Debug.Log($"RoomSelectionPanleを表示します。");
+        Debug.Log("RoomSelectionPanelを表示します。");
         roomSelectionPanel.SetActive(true);
-        createRoomPanel.SetActive(false);
-        joinRoomPanel.SetActive(false);
-    }
-
-    /// <summary>
-    /// RoomCreateButtonを押したとき、CreateRoomPanelへ移行する
-    /// </summary>
-    public void ShowCreateRoomPanel()
-    {
-        roomSelectionPanel.SetActive(false);
-        createRoomPanel.SetActive(true);
         joinRoomPanel.SetActive(false);
     }
 
@@ -91,7 +90,6 @@ public class OutGameUIManager : MonoBehaviour
     public void ShowJoinRoomPanel()
     {
         roomSelectionPanel.SetActive(false);
-        createRoomPanel.SetActive(false);
         joinRoomPanel.SetActive(true);
     }
 }
