@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using Fusion; // PlayerRefを使うために追加
 
 public class LobbyUIManager : MonoBehaviour
 {
@@ -12,7 +14,10 @@ public class LobbyUIManager : MonoBehaviour
     [Tooltip("ルームIDを表示するテキスト")]
     [SerializeField] private TextMeshProUGUI roomIdText;
 
-    [Tooltip("ゲームを開始するボタン（ホストのみ押せるようにする予定）")]
+    [Tooltip("プレイヤー一覧を表示するテキスト")]
+    [SerializeField] private TextMeshProUGUI playerListText;
+
+    [Tooltip("ゲームを開始するボタン（ホストのみ押せるようにする）")]
     [SerializeField] private Button startGameButton;
 
     [Tooltip("部屋から退出するボタン")]
@@ -47,6 +52,12 @@ public class LobbyUIManager : MonoBehaviour
         {
             AppManager.Instance.OnStateChanged -= HandleStateChanged;
         }
+
+        //イベントの登録解除
+        if(NetworkManager.Instance != null)
+        {
+            NetworkManager.Instance.OnPlayerListUpdated -= UpdatePlayerListUI;
+        }
     }
 
     // ==========================================
@@ -67,6 +78,14 @@ public class LobbyUIManager : MonoBehaviour
         {
             SetupLobby();
         }
+        else
+        {
+            //Lobby以外の画面に切り替わったら、イベントを解除
+            if(NetworkManager.Instance != null)
+            {
+                NetworkManager.Instance.OnPlayerListUpdated -= UpdatePlayerListUI;
+            }
+        }
     }
 
     // ==========================================
@@ -80,9 +99,33 @@ public class LobbyUIManager : MonoBehaviour
         if (NetworkManager.Instance != null && roomIdText != null)
         {
             roomIdText.text = $"Room ID: {NetworkManager.Instance.CurrentRoomId}";
-        }
 
-        // TODO: ここに「現在部屋にいるプレイヤー一覧」を取得して表示する処理を追加していく
+            //NetworkManagerから「人数が変わったよ！」という通知を受けるイベント
+            NetworkManager.Instance.OnPlayerListUpdated += UpdatePlayerListUI;
+
+            //Lobby画面を開いた瞬間のメンバーを画面に反映
+            List<PlayerRef> currentPlayers = NetworkManager.Instance.GetCurrentPlayers();
+            UpdatePlayerListUI(currentPlayers);
+        }
+    }
+
+    // ==========================================
+    // プレイヤー一覧UIを更新する処理
+    // ==========================================
+    private void UpdatePlayerListUI(List<PlayerRef> players)
+    {
+        if (playerListText == null) return;
+
+        // 見出しを作ってテキストをリセット
+        playerListText.text = "【参加メンバー】\n";
+
+        // リストの中身を一つずつ取り出して、改行しながら追加していく
+        foreach (var player in players)
+        {
+            // 今回はまだ自由に名前を付ける機能がないので、とりあえずFusionのIDを表示します
+            // 例: 「・Player_1」
+            playerListText.text += $"・Player_{player.PlayerId}\n";
+        }
     }
 
     // ==========================================
