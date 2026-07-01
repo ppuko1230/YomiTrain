@@ -1206,6 +1206,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14644bbb96093a4489314080c60bf415, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OutGameUIManager
+  outGameRoot: {fileID: 0}
+  roomSelectionPanel: {fileID: 0}
+  joinRoomPanel: {fileID: 0}
+  roomJoinButton: {fileID: 0}
+  joinBackButton: {fileID: 0}
 --- !u!1 &1392648583
 GameObject:
   m_ObjectHideFlags: 0
