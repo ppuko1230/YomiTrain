@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using DG.Tweening; // DOTweenを使用するための宣言
+using UnityEngine.UI;
 
 public class InGameViewManager : MonoBehaviour
 {
