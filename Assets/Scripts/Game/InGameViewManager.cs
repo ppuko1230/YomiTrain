@@ -34,7 +34,11 @@ public class InGameViewManager : MonoBehaviour
                 // TODO: 背景スクロールの開始や、ポッポー音の再生などをここに書く
                 break;
 
-            case InGamePhase.Answering:
+            case InGamePhase.ParentAnswering:
+                ShowQuestionUI();
+                break;
+
+            case InGamePhase.ChildrenAnswering:
                 ShowQuestionUI();
                 break;
 
