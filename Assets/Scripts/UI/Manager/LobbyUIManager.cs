@@ -139,8 +139,8 @@ public class LobbyUIManager : MonoBehaviour
 
     private void OnClickLeaveRoom()
     {
-        // TODO: 部屋から退出して、通信を切断し、RoomSelect状態に戻る処理
+        //部屋から退出して、通信を切断し、RoomSelect状態に戻る処理
         Debug.Log("退出ボタンが押されました");
-        // 例: AppManager.Instance.ChangeState(GameState.RoomSelect);
+        AppManager.Instance.ChangeState(GameState.RoomSelect);
     }
 }
