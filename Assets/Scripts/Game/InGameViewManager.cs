@@ -36,7 +36,7 @@ public class InGameViewManager : MonoBehaviour
                 break;
 
             case InGamePhase.WaitQuestion:
-                // TODO: 背景スクロールの開始や、ポッポー音の再生などをここに書く
+                HideQuestionUI();
                 break;
 
             case InGamePhase.ParentAnswering:
@@ -58,6 +58,9 @@ public class InGameViewManager : MonoBehaviour
             case InGamePhase.RoundEnd:
                 // ラウンド終了：電車を非表示にする
                 SetTrainsActive(false);
+                HideQuestionUI();
+                // TODO: 次のラウンドへ向けて障害物を消すなどの処理を書く
+
                 break;
         }
     }
