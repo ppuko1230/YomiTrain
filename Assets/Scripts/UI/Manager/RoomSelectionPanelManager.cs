@@ -3,22 +3,22 @@ using UnityEngine.UI;
 
 public class RoomSelectionPanelManager : MonoBehaviour
 {
-    [Header("UI‚ÌQÆ")]
-    [Tooltip("•”‰®‚ğì‚éi’ÊM‚ğŠJn‚·‚éjƒ{ƒ^ƒ“")]
+    [Header("UIã®å‚ç…§")]
+    [Tooltip("éƒ¨å±‹ã‚’ä½œã‚‹ï¼ˆé€šä¿¡ã‚’é–‹å§‹ã™ã‚‹ï¼‰ãƒœã‚¿ãƒ³")]
     [SerializeField] private Button createRoomButton;
 
-    [Tooltip("ì¬’†‚É•\¦‚·‚éƒ[ƒh‰æ–Ê‚Ìƒpƒlƒ‹")]
+    [Tooltip("ä½œæˆä¸­ã«è¡¨ç¤ºã™ã‚‹ãƒ­ãƒ¼ãƒ‰ç”»é¢ã®ãƒ‘ãƒãƒ«")]
     [SerializeField] private GameObject loadingPanel;
 
     private void Start()
     {
-        // Å‰‚Í”O‚Ì‚½‚ßƒ[ƒh‰æ–Ê‚ğ”ñ•\¦‚É‚µ‚Ä‚¨‚­
+        // æœ€åˆã¯å¿µã®ãŸã‚ãƒ­ãƒ¼ãƒ‰ç”»é¢ã‚’éè¡¨ç¤ºã«ã—ã¦ãŠã
         if (loadingPanel != null)
         {
             loadingPanel.SetActive(false);
         }
 
-        // •”‰®‚ğì‚éƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚Ìˆ—‚ğƒXƒNƒŠƒvƒg‚©‚ç“o˜^
+        // éƒ¨å±‹ã‚’ä½œã‚‹ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã¨ãã®å‡¦ç†ã‚’ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‹ã‚‰ç™»éŒ²
         if (createRoomButton != null)
         {
             createRoomButton.onClick.AddListener(OnClickCreateRoom);
@@ -26,39 +26,52 @@ public class RoomSelectionPanelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// •”‰®‚ğì‚éƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚ÉÀs‚³‚ê‚éˆ—
+    /// éƒ¨å±‹ã‚’ä½œã‚‹ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã¨ãã«å®Ÿè¡Œã•ã‚Œã‚‹å‡¦ç†
     /// </summary>
     public async void OnClickCreateRoom()
     {
-        // 1. €”õ’iŠKFƒ{ƒ^ƒ“‚ğ‰Ÿ‚¹‚È‚­‚µAƒ[ƒh‰æ–Ê‚ğ•\¦‚·‚é
+        // 1. æº–å‚™æ®µéšï¼šãƒœã‚¿ãƒ³ã‚’æŠ¼ã›ãªãã—ã€ãƒ­ãƒ¼ãƒ‰ç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
         createRoomButton.interactable = false;
         if (loadingPanel != null)
         {
             loadingPanel.SetActive(true);
         }
 
-        // 2. ’ÊMˆ—FNetworkManager‚Éu•”‰®‚ğì‚Á‚ÄIv‚ÆˆË—Š‚µAŒ‹‰Ê‚ğ‘Ò‚Â
+        // 2. é€šä¿¡å‡¦ç†ï¼šNetworkManagerã«ã€Œéƒ¨å±‹ã‚’ä½œã£ã¦ï¼ã€ã¨ä¾é ¼ã—ã€çµæœã‚’å¾…ã¤
         string newSessionName = await NetworkManager.Instance.CreateRoomHost();
 
-        // 3. ’ÊM‚ªI‚í‚Á‚½‚Ì‚Åƒ[ƒh‰æ–Ê‚ğ‰B‚·
+        // 3. é€šä¿¡ãŒçµ‚ã‚ã£ãŸã®ã§ãƒ­ãƒ¼ãƒ‰ç”»é¢ã‚’éš ã™
         if (loadingPanel != null)
         {
             loadingPanel.SetActive(false);
         }
 
-        // 4. Œ‹‰Ê‚Ìˆ—
+        // 4. çµæœã®å‡¦ç†
         if (!string.IsNullOrEmpty(newSessionName))
         {
-            // y¬Œ÷‚µ‚½ê‡z
-            // RoomID‚Ì•\¦‚È‚Ç‚ÍLobby‰æ–Ê‚É”C‚¹‚é‚Ì‚ÅA‚±‚±‚Í‰æ–Ê‘JˆÚ‚ğŒÄ‚Ô‚¾‚¯I
+            // ã€æˆåŠŸã—ãŸå ´åˆã€‘
+            // RoomIDã®è¡¨ç¤ºãªã©ã¯Lobbyç”»é¢ã«ä»»ã›ã‚‹ã®ã§ã€ã“ã“ã¯ç”»é¢é·ç§»ã‚’å‘¼ã¶ã ã‘ï¼
             AppManager.Instance.ChangeState(GameState.RoomLobby);
         }
         else
         {
-            // y¸”s‚µ‚½ê‡z
-            Debug.LogError("ƒ‹[ƒ€ì¬ƒGƒ‰[");
+            // ã€å¤±æ•—ã—ãŸå ´åˆã€‘
+            Debug.LogError("ãƒ«ãƒ¼ãƒ ä½œæˆã‚¨ãƒ©ãƒ¼");
             createRoomButton.interactable = true;
-            // TODO: ƒGƒ‰[ƒ_ƒCƒAƒƒO‚È‚Ç‚ğo‚·ê‡‚Í‚±‚±‚É‹Lq
+            // TODO: ã‚¨ãƒ©ãƒ¼ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ãªã©ã‚’å‡ºã™å ´åˆã¯ã“ã“ã«è¨˜è¿°
+        }
+    }
+
+    /// <summary>
+    /// RoomSelectionç”»é¢ã®UIã‚’åˆæœŸçŠ¶æ…‹ã«æˆ»ã™
+    /// </summary>
+    public void ResetUI()
+    {
+        createRoomButton.interactable = true;
+
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(false);
         }
     }
 }

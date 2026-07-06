@@ -82,6 +82,14 @@ public class OutGameUIManager : MonoBehaviour
         Debug.Log("RoomSelectionPanelを表示します。");
         roomSelectionPanel.SetActive(true);
         joinRoomPanel.SetActive(false);
+        // RoomSelectionPanelのUIを初期状態に戻す
+        RoomSelectionPanelManager panelManager =
+            roomSelectionPanel.GetComponent<RoomSelectionPanelManager>();
+
+        if (panelManager != null)
+        {
+            panelManager.ResetUI();
+        }
     }
 
     /// <summary>
