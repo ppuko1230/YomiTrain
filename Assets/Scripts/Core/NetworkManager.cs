@@ -19,6 +19,10 @@ public class NetworkManager : MonoBehaviour
     //人数の変化を検知するための記憶用変数
     private int _lastPlayerCount = 0;
 
+    [Header("ネットワーク上に召喚するシステムプレハブ")]
+    [SerializeField] private NetworkPrefabRef networkBehaviorPrefab;
+    [SerializeField] private NetworkPrefabRef playerManagerPrefab;
+
     //現在部屋にいるプレイヤーのリストを返す関数
     public List<PlayerRef> GetCurrentPlayers()
     {
@@ -63,11 +67,11 @@ public class NetworkManager : MonoBehaviour
     public async Task<string> CreateRoomHost()
     {
         _runner = gameObject.GetComponent<NetworkRunner>();
-        if (_runner == null)
-        {
-            _runner = gameObject.AddComponent<NetworkRunner>();
-        }
+        if (_runner == null) { _runner = gameObject.AddComponent<NetworkRunner>(); }
         _runner.ProvideInput = true;
+
+        var sceneManager = gameObject.GetComponent<NetworkSceneManagerDefault>();
+        if (sceneManager == null) sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
 
         string generatedRoomId = GenerateRandomRoomId(6);
 
@@ -75,13 +79,23 @@ public class NetworkManager : MonoBehaviour
         {
             GameMode = GameMode.Host,
             SessionName = generatedRoomId,
-            PlayerCount = 6
+            PlayerCount = 6,
+            SceneManager = sceneManager
         });
 
         if (result.Ok)
         {
             CurrentRoomId = generatedRoomId;
             Debug.Log($"ルーム作成成功。RoomID：{generatedRoomId}");
+
+            // ★【本来の実装】ホストが成功した直後に、管理オブジェクトをネットワーク上にSpawnする！
+            if (_runner.IsServer)
+            {
+                _runner.Spawn(networkBehaviorPrefab);
+                _runner.Spawn(playerManagerPrefab);
+                Debug.Log("ネットワーク管理オブジェクトをSpawnしました。");
+            }
+
             return generatedRoomId;
         }
         else
@@ -115,6 +129,24 @@ public class NetworkManager : MonoBehaviour
             return false;
         }
     }
+
+    // 自分がホスト（サーバー）かどうかを判定するプロパティ
+    public bool IsHost => _runner != null && _runner.IsServer;
+
+    // 通信を切断して部屋から退出する関数
+    public async Task LeaveRoomAsync()
+    {
+        if (_runner != null)
+        {
+            await _runner.Shutdown();
+            _runner = null;
+        }
+
+        CurrentRoomId = null;
+        _lastPlayerCount = 0;
+        Debug.Log("通信を切断し、ルームから退出しました。");
+    }
+
     private string GenerateRandomRoomId(int length)
     {
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

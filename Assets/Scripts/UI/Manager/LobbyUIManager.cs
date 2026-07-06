@@ -133,14 +133,43 @@ public class LobbyUIManager : MonoBehaviour
     // ==========================================
     private void OnClickStartGame()
     {
-        // TODO: ホストが「はじめる」を押したときの処理（親決め画面へ遷移など）
-        Debug.Log("ゲーム開始ボタンが押されました");
+        // NetworkManagerを使って、自分がホストかどうかをチェックする
+        if (NetworkManager.Instance != null && NetworkManager.Instance.IsHost)
+        {
+            Debug.Log("ホストとしてゲーム開始ボタンが押されました。親決め画面（InGame）へ遷移します。");
+
+            // ホストの画面を遷移させる
+            AppManager.Instance.ChangeState(GameState.InGame);
+
+            // 【補足】
+            // もしクライアント（子）も一斉にInGameへ画面遷移させたい場合は、
+            // NetworkBehaviorのフェーズを移行させ、それに応じて各端末のAppManagerを
+            // 動かすような設計にすると、全員の画面が綺麗に同期して切り替わります。
+        }
+        else
+        {
+            // クライアント（子）が押した場合は何もしないか、警告を出す
+            Debug.LogWarning("ゲームを開始できるのはホストのみです。");
+        }
     }
 
-    private void OnClickLeaveRoom()
+    private async void OnClickLeaveRoom()
     {
-        //部屋から退出して、通信を切断し、RoomSelect状態に戻る処理
-        Debug.Log("退出ボタンが押されました");
+        Debug.Log("退出ボタンが押されました。切断処理を開始します...");
+
+        // 退出ボタンが連打されるのを防ぐためにボタンを無効化
+        if (leaveButton != null) leaveButton.interactable = false;
+
+        // NetworkManager に追加した切断処理を非同期で実行
+        if (NetworkManager.Instance != null)
+        {
+            await NetworkManager.Instance.LeaveRoomAsync();
+        }
+
+        // 切断が完了したら、ボタンを再度押せるように戻す
+        if (leaveButton != null) leaveButton.interactable = true;
+
+        // 通信が切れたので、ルーム選択画面に戻る
         AppManager.Instance.ChangeState(GameState.RoomSelect);
     }
 }

@@ -7,6 +7,15 @@ public class NetworkBehavior : NetworkBehaviour
     [SerializeField]
     private InGameViewManager inGameViewManager;
 
+    [Header("お題のリスト（山札）")]
+    [SerializeField, Tooltip("作ったQuestionDataをここに全部入れる")]
+    private QuestionData[] allQuestions;
+
+    /// <summary>
+    /// 今選ばれているお題の番号（通信で全員に共有される！）
+    /// </summary>
+    [Networked]
+    public int CurrentQuestionIndex { get; private set; }
     [Networked]
     public InGamePhase CurrentPhase { get; private set; }
 
@@ -58,6 +67,18 @@ public class NetworkBehavior : NetworkBehaviour
                 }
                 break;
 
+            case InGamePhase.WaitQuestion:
+                // 本来はここで「第1問！」などの演出を挟むが、今はすぐに親の回答フェーズへ進める
+                CurrentPhase = InGamePhase.ParentAnswering;
+
+                // ランダムにお題を1つ引く
+                if (allQuestions != null && allQuestions.Length > 0)
+                {
+                    CurrentQuestionIndex = UnityEngine.Random.Range(0, allQuestions.Length);
+                }
+                Debug.Log($"[NetworkBehavior] お題を引きました！ ParentAnsweringへ移行します");
+                break;
+
             case InGamePhase.ParentAnswering:
                 if (PlayerManager.Instance.IsAnswerCreated(PlayerManager.Instance.ParentPlayer))
                 {
@@ -74,6 +95,12 @@ public class NetworkBehavior : NetworkBehaviour
                 }
                 break;
 
+            case InGamePhase.Calculate:
+                // 集計フェーズに入ったら、自動的に結果演出フェーズへ進める
+                CurrentPhase = InGamePhase.ResultAnim;
+                Debug.Log("[NetworkBehavior] 集計完了。ResultAnimへ自動移行します");
+                break;
+
             case InGamePhase.RoundEnd:
                 if (PlayerManager.Instance.AreAllPlayersNextQuestionReady())
                 {
@@ -84,9 +111,17 @@ public class NetworkBehavior : NetworkBehaviour
         }
     }
 
+    // ホストが親の回答フェーズを開始する時に呼ばれる関数
     public void StartParentAnswering()
     {
         if (!Object.HasStateAuthority) return;
+
+        // ここで山札の中からランダムに1つ番号を引く（03など）
+        if (allQuestions != null && allQuestions.Length > 0)
+        {
+            CurrentQuestionIndex = UnityEngine.Random.Range(0, allQuestions.Length);
+        }
+
         CurrentPhase = InGamePhase.ParentAnswering;
     }
 
@@ -105,13 +140,31 @@ public class NetworkBehavior : NetworkBehaviour
     private void ApplyPhaseToView(InGamePhase phase)
     {
         if (inGameViewManager == null)
-        {
             inGameViewManager = FindFirstObjectByType<InGameViewManager>();
-        }
 
         if (inGameViewManager != null)
         {
-            inGameViewManager.OnPhaseChanged(phase);
+            // 選ばれているお題を山札から取り出す
+            QuestionData currentQuestion = null;
+            if (allQuestions != null && CurrentQuestionIndex < allQuestions.Length)
+            {
+                currentQuestion = allQuestions[CurrentQuestionIndex];
+            }
+
+            // UIへ「フェーズ」と「お題データ」をセットで渡す！
+            inGameViewManager.OnPhaseChanged(phase, currentQuestion);
         }
+    }
+    // テスト用に、強制的にお題表示フェーズへ行く関数を作っておきます
+    public void TestStartQuestion()
+    {
+        // ランダムにお題を1つ選ぶ
+        if (allQuestions != null && allQuestions.Length > 0)
+        {
+            CurrentQuestionIndex = UnityEngine.Random.Range(0, allQuestions.Length);
+        }
+
+        // お題表示フェーズ（親の回答フェーズ）へ！
+        CurrentPhase = InGamePhase.ParentAnswering;
     }
 }

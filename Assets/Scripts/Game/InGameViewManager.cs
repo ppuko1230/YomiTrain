@@ -1,12 +1,25 @@
 ﻿using UnityEngine;
-using DG.Tweening; // DOTweenを使用するための宣言
 using UnityEngine.UI;
+using DG.Tweening; // DOTweenを使用するための宣言
+using TMPro;
+
 
 public class InGameViewManager : MonoBehaviour
 {
     [Header("UI設定")]
     [SerializeField, Tooltip("問題文やタイマーをまとめた親オブジェクトのCanvasGroup")]
     private CanvasGroup questionUI;
+    [Header("テキストの参照")]
+    [SerializeField] private TextMeshProUGUI questionTextUI; // お題を表示するテキスト
+    [SerializeField] private TextMeshProUGUI[] choiceTextUIs; // 選択肢を表示する4つのテキスト
+
+    [Header("演出用UI")]
+    [Tooltip("画面を覆う真っ黒なパネル（CanvasGroupが必要）")]
+    [SerializeField] private CanvasGroup blackoutPanel;
+
+    [Header("背景の切り替え")]
+    [SerializeField] private GameObject singleLaneBackground;
+    [SerializeField] private GameObject fourLanesBackground;
 
     [Header("電車とレーン設定")]
     [SerializeField, Tooltip("6人分の電車オブジェクトを順番にセット")]
@@ -14,8 +27,19 @@ public class InGameViewManager : MonoBehaviour
     [SerializeField, Tooltip("4つのレーン（①〜④）の基準となるオブジェクトをセット")]
     private Transform[] lanes;
 
-    [SerializeField] private TrainMover trainMover;
+    [Header("4つのレールの基準となるUI")]
+    [Tooltip("fourLanesBackground1〜4を上から順に入れてください")]
+    [SerializeField] private RectTransform[] laneRects = new RectTransform[4];
 
+    // 自分が選んだ選択肢の番号（0〜3）を一時的に保存しておく変数
+    private int myChoiceIndex = 0;
+
+    // UIManagerから「これを選んだよ！」と教えてもらうための関数
+    public void SetMyChoice(int choice)
+    {
+        myChoiceIndex = choice;
+    }
+    
     // クラスの最初（変数の宣言エリア）に追加
     private Vector3[] initialTrainPositions;
     // =========================================================
@@ -25,7 +49,7 @@ public class InGameViewManager : MonoBehaviour
     /// <summary>
     /// フェーズが切り替わった時に呼ばれる
     /// </summary>
-    public void OnPhaseChanged(InGamePhase newPhase)
+    public void OnPhaseChanged(InGamePhase newPhase, QuestionData currentQuestion = null)
     {
         Debug.Log($"[View] フェーズ演出開始: {newPhase}");
 
@@ -40,17 +64,17 @@ public class InGameViewManager : MonoBehaviour
                 break;
 
             case InGamePhase.ParentAnswering:
-                ShowQuestionUI();
+                ShowQuestionUI(currentQuestion);
                 break;
 
             case InGamePhase.ChildrenAnswering:
-                ShowQuestionUI();
+                ShowQuestionUI(currentQuestion);
                 break;
 
             case InGamePhase.ResultAnim:
-                // ★結果演出フェーズ：電車を表示して走らせる
+                // 結果演出フェーズ：電車を表示して走らせる
                 SetTrainsActive(true);
-
+                PlayResultTransition();
                 // ここでTrainMoverのStart処理を呼ぶ（各電車にアタッチされている場合）
                 // 例: foreachで各電車のスクリプトを取得して走らせる
                 break;
@@ -105,13 +129,32 @@ public class InGameViewManager : MonoBehaviour
     // ▼ 内部で実行するアニメーション処理 ▼
     // =========================================================
 
-    private void ShowQuestionUI()
+    public void ShowQuestionUI(QuestionData currentQuestion)
     {
-        if (questionUI == null) return;
+        if (questionUI == null || currentQuestion == null) return;
 
+        if (singleLaneBackground != null) singleLaneBackground.SetActive(true);
+        if (fourLanesBackground != null) fourLanesBackground.SetActive(false);
+
+        // ① データをUIのテキストに代入する
+        if (questionTextUI != null)
+        {
+            questionTextUI.text = currentQuestion.questionText;
+        }
+
+        // 4つの選択肢テキストに代入する
+        for (int i = 0; i < choiceTextUIs.Length; i++)
+        {
+            if (i < currentQuestion.choices.Length && choiceTextUIs[i] != null)
+            {
+                choiceTextUIs[i].text = currentQuestion.choices[i];
+            }
+        }
+
+        // ② アニメーションで表示する
+        questionUI.DOKill(); // ★追加：残っているアニメーションを強制リセット！
         questionUI.gameObject.SetActive(true);
         questionUI.alpha = 0f;
-        // 0.5秒かけて透明度を0から1へ（フェードイン）
         questionUI.DOFade(1f, 0.5f);
     }
 
@@ -161,5 +204,84 @@ public class InGameViewManager : MonoBehaviour
                 train.gameObject.SetActive(isActive);
             }
         }
+    }
+
+    // ==========================================
+    // ▼ 暗転から電車発車までの連続アニメーション ▼
+    // ==========================================
+    private void PlayResultTransition()
+    {
+        if (blackoutPanel == null) return;
+
+        // まずBlackoutPanelを表示して、完全に透明（0）にしておく
+        blackoutPanel.gameObject.SetActive(true);
+        blackoutPanel.alpha = 0f;
+
+        // DOTweenのSequenceを作って、やりたい事を順番に登録していく
+        Sequence seq = DOTween.Sequence();
+
+        // ① 0.5秒かけて画面を真っ黒にする（フェードイン）
+        seq.Append(blackoutPanel.DOFade(1f, 0.5f));
+
+        // ② 画面が真っ黒になった瞬間に、裏側でUIを消して電車を準備する
+        seq.AppendCallback(() =>
+        {
+            if (questionUI != null) questionUI.gameObject.SetActive(false);
+
+            // 背景を4車線に切り替える
+            if (singleLaneBackground != null) singleLaneBackground.SetActive(false);
+            if (fourLanesBackground != null) fourLanesBackground.SetActive(true);
+
+            SetTrainsActive(true);
+
+            // ▼▼▼ ワープ処理をこのように書き換えます ▼▼▼
+            if (laneRects.Length > myChoiceIndex && laneRects[myChoiceIndex] != null)
+            {
+                // UI（RectTransform）の絶対座標(position.y)を取得する！
+                // ※これにより、画面サイズが変わっても正確な高さを自動で取得できます
+                float targetY = laneRects[myChoiceIndex].position.y;
+
+                if (trains != null)
+                {
+                    foreach (Transform train in trains)
+                    {
+                        if (train != null)
+                        {
+                            // localPosition（親からの相対距離）ではなく、
+                            // position（ワールド絶対座標）を使うのがズレないコツです！
+                            Vector3 pos = train.position;
+                            pos.y = targetY;
+                            train.position = pos;
+                        }
+                    }
+                }
+            }
+        });
+
+        // ③ 0.5秒かけて黒い画面を透明に戻す（フェードアウト）
+        seq.Append(blackoutPanel.DOFade(0f, 0.5f));
+
+        // ④ 完全に画面が明るくなったら、電車を走らせる！
+        seq.AppendCallback(() =>
+        {
+            blackoutPanel.gameObject.SetActive(false);
+
+            // ここを変更！ trains配列に入っている全ての電車を走らせる
+            if (trains != null)
+            {
+                foreach (Transform train in trains)
+                {
+                    if (train != null)
+                    {
+                        // 各電車にくっついているTrainMoverを取得してスタート！
+                        TrainMover mover = train.GetComponent<TrainMover>();
+                        if (mover != null)
+                        {
+                            mover.StartTrainAnimation();
+                        }
+                    }
+                }
+            }
+        });
     }
 }

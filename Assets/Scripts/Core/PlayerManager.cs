@@ -104,6 +104,10 @@ public class PlayerManager : NetworkBehaviour
     {
         PlayerRef player = info.Source;
 
+        if (player == PlayerRef.None && Object.HasStateAuthority)
+        {
+            player = Runner.LocalPlayer;
+        }
         if (!PlayerStatuses.TryGet(player, out PlayerStatus status))
         {
             status = new PlayerStatus

@@ -5,7 +5,7 @@ public class TrainMover : MonoBehaviour
 {
     [Header("移動設定")]
     [SerializeField, Tooltip("移動するスピード")]
-    private float speed = 5.0f;
+    private float speed = 100.0f;
 
     [SerializeField, Tooltip("移動する方向（横移動ならX軸など）")]
     private Vector3 moveDirection = Vector3.right;
