@@ -12,7 +12,7 @@ TagManager:
   - Water
   - UI
   - blackout
-  - 
+  - Pixel3D
   - 
   - 
   - 
@@ -47,5 +47,9 @@ TagManager:
   - name: UI
     uniqueID: 2725128051
     locked: 0
+  - name: Pixel3D
+    uniqueID: 211011471
+    locked: 0
   m_RenderingLayers:
   - Default
+  - Pixel

@@ -14,6 +14,10 @@ public class InGameViewManager : MonoBehaviour
     [SerializeField, Tooltip("4つのレーン（①〜④）の基準となるオブジェクトをセット")]
     private Transform[] lanes;
 
+    [SerializeField] private TrainMover trainMover;
+
+    // クラスの最初（変数の宣言エリア）に追加
+    private Vector3[] initialTrainPositions;
     // =========================================================
     //  八木君が使用する関数
     // =========================================================
@@ -44,13 +48,36 @@ public class InGameViewManager : MonoBehaviour
                 break;
 
             case InGamePhase.ResultAnim:
-                HideQuestionUI();
-                // TODO: 当たり外れの判定データを受け取って、障害物を出す処理などをここに書く
+                // ★結果演出フェーズ：電車を表示して走らせる
+                SetTrainsActive(true);
+
+                // ここでTrainMoverのStart処理を呼ぶ（各電車にアタッチされている場合）
+                // 例: foreachで各電車のスクリプトを取得して走らせる
                 break;
 
             case InGamePhase.RoundEnd:
-                // TODO: 次のラウンドへ向けて障害物を消すなどの処理を書く
+                // ラウンド終了：電車を非表示にする
+                SetTrainsActive(false);
                 break;
+        }
+    }
+
+    // =========================================================
+    // 初期化処理
+    // =========================================================
+    private void Start()
+    {
+        // ゲーム開始時に、各電車の最初の座標を配列に記憶しておく
+        if (trains != null)
+        {
+            initialTrainPositions = new Vector3[trains.Length];
+            for (int i = 0; i < trains.Length; i++)
+            {
+                if (trains[i] != null)
+                {
+                    initialTrainPositions[i] = trains[i].position;
+                }
+            }
         }
     }
 
@@ -101,6 +128,35 @@ public class InGameViewManager : MonoBehaviour
         // ラウンド開始前のリセット処理
         HideQuestionUI();
 
-        // TODO: 電車の位置を初期位置に戻す処理などを追加
+        // 電車の位置を初期位置に戻す処理
+        if (trains != null && initialTrainPositions != null)
+        {
+            for (int i = 0; i < trains.Length; i++)
+            {
+                if (trains[i] != null)
+                {
+                    // 記憶しておいた初期座標を代入して戻す
+                    trains[i].position = initialTrainPositions[i];
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 配列内のすべての電車の表示/非表示を切り替える関数
+    /// </summary>
+    private void SetTrainsActive(bool isActive)
+    {
+        // 配列が空でないかチェック
+        if (trains == null) return;
+
+        foreach (Transform train in trains)
+        {
+            if (train != null)
+            {
+                // TransformからgameObjectにアクセスしてSetActiveを呼ぶ
+                train.gameObject.SetActive(isActive);
+            }
+        }
     }
 }
