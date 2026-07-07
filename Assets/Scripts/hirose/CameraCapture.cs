@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.IO;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class CameraCapture : MonoBehaviour
 {
@@ -11,7 +12,15 @@ public class CameraCapture : MonoBehaviour
 
     private void Start()
     {
-        CaptureCameraView();
+
+    }
+
+    private void Update()
+    {
+        if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame) //Cƒ{ƒ^ƒ“‚ÅŽB‰e
+        {
+            CaptureCameraView();
+        }
     }
 
     public void CaptureCameraView()
