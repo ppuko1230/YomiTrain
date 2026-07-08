@@ -54,6 +54,14 @@ public class LoopingBackground : MonoBehaviour
         }
     }
 
+    public void SetBackgroundsVisible(bool visible)
+    {
+        for (int i = 0; i < backgrounds.Length; i++)
+        {
+            backgrounds[i].gameObject.SetActive(visible);
+        }
+    }
+
     [ContextMenu("’âŽ~‚·‚é(ƒeƒXƒg)")]
     private void StopScrolling_Test()
     {
